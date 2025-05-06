@@ -8,12 +8,21 @@ import {
   StyleSheet,
   Keyboard,
   ImageBackground,
-  KeyboardAvoidingView,
-  Platform
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather, AntDesign } from '@expo/vector-icons';
 
+// ⚙️ Ativar animações no Android
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
+
+// 🖼️ Imagem de fundo
 const backgroundImg = {
   uri: 'https://wallpaper.forfun.com/fetch/24/24c9965c30cdb843da673bb0ca60e278.jpeg',
 };
@@ -46,12 +55,14 @@ export default function App() {
       text: task,
       completed: false,
     };
+    LayoutAnimation.easeInEaseOut();
     setTasks([...tasks, newTask]);
     setTask('');
     Keyboard.dismiss();
   };
 
   const toggleTask = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setTasks((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, completed: !item.completed } : item
@@ -60,6 +71,7 @@ export default function App() {
   };
 
   const deleteTask = (id) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setTasks((prev) => prev.filter((item) => item.id !== id));
   };
 
@@ -67,9 +79,9 @@ export default function App() {
     <View style={styles.taskItem}>
       <TouchableOpacity onPress={() => toggleTask(item.id)} style={styles.checkButton}>
         {item.completed ? (
-          <AntDesign name="checkcircle" size={24} color="#4ade80" />
+          <AntDesign name="checkcircle" size={24} color="#00FFB2" />
         ) : (
-          <Feather name="circle" size={24} color="#aaa" />
+          <Feather name="circle" size={24} color="#999" />
         )}
       </TouchableOpacity>
 
@@ -78,42 +90,37 @@ export default function App() {
       </Text>
 
       <TouchableOpacity onPress={() => deleteTask(item.id)}>
-        <Feather name="trash-2" size={22} color="#ef4444" />
+        <Feather name="trash-2" size={22} color="#FF4C61" />
       </TouchableOpacity>
     </View>
   );
 
   return (
     <ImageBackground source={backgroundImg} style={styles.background} blurRadius={1}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.overlay}>
-          <Text style={styles.title}>🌀 Missões Shinobi</Text>
+      <View style={styles.overlay}>
+        <Text style={styles.title}>🌌 Missões Shinobi</Text>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite sua missão ninja..."
-              placeholderTextColor="#aaa"
-              value={task}
-              onChangeText={setTask}
-            />
-            <TouchableOpacity style={styles.addButton} onPress={addTask}>
-              <AntDesign name="pluscircle" size={28} color="#60a5fa" />
-            </TouchableOpacity>
-          </View>
-
-          <FlatList
-            data={tasks}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            style={{ marginTop: 30 }}
-            showsVerticalScrollIndicator={false}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite sua missão..."
+            placeholderTextColor="#aaa"
+            value={task}
+            onChangeText={setTask}
           />
+          <TouchableOpacity style={styles.addButton} onPress={addTask}>
+            <AntDesign name="pluscircle" size={28} color="#00FFB2" />
+          </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          style={{ marginTop: 30 }}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </ImageBackground>
   );
 }
@@ -121,27 +128,33 @@ export default function App() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    resizeMode: 'cover',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     paddingTop: 60,
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#00FFB2',
     textAlign: 'center',
     marginBottom: 25,
     letterSpacing: 2,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 6,
   },
   inputContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
     padding: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#00FFB2',
   },
   input: {
     flex: 1,
@@ -155,15 +168,13 @@ const styles = StyleSheet.create({
   },
   taskItem: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 12,
     padding: 14,
     marginVertical: 8,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#00FFB2',
   },
   checkButton: {
     marginRight: 12,
@@ -175,6 +186,6 @@ const styles = StyleSheet.create({
   },
   taskCompleted: {
     textDecorationLine: 'line-through',
-    color: '#bbb',
+    color: '#888',
   },
 });
